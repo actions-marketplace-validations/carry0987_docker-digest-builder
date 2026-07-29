@@ -3,12 +3,21 @@ import * as path from 'node:path';
 import { DefaultArtifactClient } from '@actions/artifact';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { buildBuildxArgs, extractDigest, getArtifactName, platformToSlug, resolveCacheScope } from './helpers';
+import {
+    buildBuildxArgs,
+    extractDigest,
+    getArtifactName,
+    normalizeImageName,
+    platformToSlug,
+    resolveCacheScope
+} from './helpers';
 
 async function run(): Promise<void> {
     try {
         // --- Read inputs ---
-        const image = core.getInput('image', { required: true });
+        const imageInput = core.getInput('image', { required: true });
+        const normalizeImage = core.getBooleanInput('normalize');
+        const image = normalizeImageName(imageInput, normalizeImage);
         const platform = core.getInput('platform', { required: true });
         const file = core.getInput('file');
         const context = core.getInput('context');
@@ -23,6 +32,10 @@ async function run(): Promise<void> {
         // --- Prepare platform slug ---
         const slug = platformToSlug(platform);
         const scope = resolveCacheScope(cacheScope, slug);
+
+        if (image !== imageInput) {
+            core.info(`Normalized image repository name: ${image}`);
+        }
 
         core.info(`Platform: ${platform} → slug: ${slug}, cache scope: ${scope}`);
 

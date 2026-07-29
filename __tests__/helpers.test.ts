@@ -3,6 +3,7 @@ import {
     buildBuildxArgs,
     extractDigest,
     getArtifactName,
+    normalizeImageName,
     parseBuildArgs,
     platformToSlug,
     resolveCacheScope
@@ -52,6 +53,40 @@ describe('parseBuildArgs', () => {
             '--build-arg',
             'BAZ=qux'
         ]);
+    });
+});
+
+describe('normalizeImageName', () => {
+    it('returns a valid repository name unchanged', () => {
+        expect(normalizeImageName('ghcr.io/org/my_app', false)).toBe('ghcr.io/org/my_app');
+    });
+
+    it('lowercases the repository name when normalization is enabled', () => {
+        expect(normalizeImageName('GHCR.IO/My-Org/My_App', true)).toBe('ghcr.io/my-org/my_app');
+    });
+
+    it('rejects uppercase repository names when normalization is disabled', () => {
+        expect(() => normalizeImageName('GHCR.IO/My-Org/My_App', false)).toThrow(
+            'Input "image" must be lowercase or enable "normalize"'
+        );
+    });
+
+    it('rejects tags', () => {
+        expect(() => normalizeImageName('ghcr.io/org/app:latest', true)).toThrow(
+            'Input "image" must not include a tag; provide a repository name only'
+        );
+    });
+
+    it('rejects digests', () => {
+        expect(() => normalizeImageName('ghcr.io/org/app@sha256:abc123', true)).toThrow(
+            'Input "image" must not include a digest; provide a repository name only'
+        );
+    });
+
+    it('rejects invalid repository names', () => {
+        expect(() => normalizeImageName('ghcr.io/org/-app', true)).toThrow(
+            'Input "image" must be a valid Docker/OCI repository name'
+        );
     });
 });
 

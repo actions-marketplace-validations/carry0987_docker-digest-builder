@@ -8,6 +8,7 @@ A GitHub Action that builds a Docker image for a single platform, pushes it by d
 - uses: carry0987/docker-digest-builder@v1
   with:
     image: ghcr.io/my-org/my-app
+    normalize: true
     platform: linux/amd64
 ```
 
@@ -32,6 +33,7 @@ jobs:
       - uses: carry0987/docker-digest-builder@v1
         with:
           image: ghcr.io/${{ github.repository }}
+          normalize: true
           platform: ${{ matrix.platform }}
 
   manifest:
@@ -56,7 +58,8 @@ jobs:
 
 | Name | Required | Default | Description |
 |------|:--------:|---------|-------------|
-| `image` | Yes | — | Full image name (e.g. `ghcr.io/org/app`) |
+| `image` | Yes | — | Repository name only (e.g. `ghcr.io/org/app`, without tag or digest) |
+| `normalize` | No | `false` | Lowercase the repository name before validation |
 | `platform` | Yes | — | Target platform (e.g. `linux/amd64`) |
 | `file` | No | `./Dockerfile` | Path to Dockerfile |
 | `context` | No | `.` | Build context path |
@@ -79,6 +82,12 @@ jobs:
 2. Runs `docker buildx build` with `push-by-digest=true` — the image is pushed to the registry without a tag, identified only by its content digest
 3. Extracts the `sha256` digest from the build metadata
 4. Writes the digest to a file and uploads it as a GitHub Actions artifact (named `{prefix}-{platform-slug}`)
+
+## Image validation
+
+The `image` input must be a valid Docker/OCI repository name. Tags (`:tag`) and digests (`@sha256:...`) are rejected.
+
+When `normalize` is `true`, the action lowercases the repository name before validation. It does not rewrite separators such as `_`, `-`, or `.`, and it does not strip tags or digests.
 
 The uploaded artifact is intended to be consumed by a subsequent job that downloads all platform digests and creates a multi-arch manifest using [`docker buildx imagetools create`](https://docs.docker.com/reference/cli/docker/buildx/imagetools/create/).
 

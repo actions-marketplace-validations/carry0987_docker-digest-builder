@@ -5,6 +5,57 @@ export function platformToSlug(platform: string): string {
     return platform.replace(/\//g, '-');
 }
 
+const REPOSITORY_NAME_MAX_LENGTH = 255;
+const REPOSITORY_ALPHANUMERIC = '[a-z0-9]+';
+const REPOSITORY_SEPARATOR = '(?:[._]|__|[-]+)';
+const REPOSITORY_PATH_COMPONENT = `${REPOSITORY_ALPHANUMERIC}(?:${REPOSITORY_SEPARATOR}${REPOSITORY_ALPHANUMERIC})*`;
+const REPOSITORY_DOMAIN_COMPONENT = '(?:[a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])';
+const REPOSITORY_DOMAIN_NAME = `${REPOSITORY_DOMAIN_COMPONENT}(?:\\.${REPOSITORY_DOMAIN_COMPONENT})*`;
+const REPOSITORY_IPV6_ADDRESS = '\\[(?:[a-f0-9:]+)\\]';
+const REPOSITORY_HOST = `(?:localhost|${REPOSITORY_DOMAIN_NAME}|${REPOSITORY_IPV6_ADDRESS})`;
+const REPOSITORY_DOMAIN_AND_PORT = `${REPOSITORY_HOST}(?::[0-9]+)?`;
+const REPOSITORY_REMOTE_NAME = `${REPOSITORY_PATH_COMPONENT}(?:/${REPOSITORY_PATH_COMPONENT})*`;
+const REPOSITORY_NAME_REGEXP = new RegExp(`^(?:${REPOSITORY_DOMAIN_AND_PORT}/)?${REPOSITORY_REMOTE_NAME}$`);
+
+/**
+ * Normalize and validate an image repository name.
+ *
+ * This action only accepts repository names. Tags and digests are rejected.
+ */
+export function normalizeImageName(image: string, normalize: boolean): string {
+    const trimmedImage = image.trim();
+
+    if (!trimmedImage) {
+        throw new Error('Input "image" must not be empty');
+    }
+
+    if (trimmedImage.includes('@')) {
+        throw new Error('Input "image" must not include a digest; provide a repository name only');
+    }
+
+    const lastSlash = trimmedImage.lastIndexOf('/');
+    const lastColon = trimmedImage.lastIndexOf(':');
+    if (lastColon > lastSlash) {
+        throw new Error('Input "image" must not include a tag; provide a repository name only');
+    }
+
+    const candidate = normalize ? trimmedImage.toLowerCase() : trimmedImage;
+
+    if (candidate.length > REPOSITORY_NAME_MAX_LENGTH) {
+        throw new Error(`Input "image" must not exceed ${REPOSITORY_NAME_MAX_LENGTH} characters`);
+    }
+
+    if (candidate !== candidate.toLowerCase()) {
+        throw new Error('Input "image" must be lowercase or enable "normalize"');
+    }
+
+    if (!REPOSITORY_NAME_REGEXP.test(candidate)) {
+        throw new Error('Input "image" must be a valid Docker/OCI repository name');
+    }
+
+    return candidate;
+}
+
 /**
  * Resolve the cache scope: use custom scope if provided, otherwise fall back to slug.
  */

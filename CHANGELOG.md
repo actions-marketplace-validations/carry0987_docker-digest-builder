@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/carry0987/docker-digest-builder/compare/v1.7.0...v1.8.0) (2026-07-29)
+
+
+### Features
+
+* Bump to v1.8.0 ([dd5879d](https://github.com/carry0987/docker-digest-builder/commit/dd5879d58ef754f9d1802dbc4c42babb966c06b3))
+
 ## [1.7.0](https://github.com/carry0987/docker-digest-builder/compare/v1.6.0...v1.7.0) (2026-07-29)
 
 

@@ -8,8 +8,12 @@ branding:
 
 inputs:
   image:
-    description: 'Full image name (e.g. ghcr.io/org/app)'
+    description: 'Repository name only (e.g. ghcr.io/org/app, without tag or digest)'
     required: true
+  normalize:
+    description: 'Whether to lowercase the image repository name before validation'
+    required: false
+    default: 'false'
   platform:
     description: 'Target platform (e.g. linux/amd64)'
     required: true

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.8.0](https://github.com/carry0987/docker-digest-builder/compare/v1.7.0...v1.8.0) (2026-07-29)
+
+
+### Features
+
+* Bump to v1.8.0 ([dd5879d](https://github.com/carry0987/docker-digest-builder/commit/dd5879d58ef754f9d1802dbc4c42babb966c06b3))
+
+## [1.7.0](https://github.com/carry0987/docker-digest-builder/compare/v1.6.0...v1.7.0) (2026-07-29)
+
+
+### Features
+
+* add optional image normalization and strict repository validation ([dbcf6d1](https://github.com/carry0987/docker-digest-builder/commit/dbcf6d1aed70d37d510adc3484b23d8fe9bdf613))
+
 ## [1.6.0](https://github.com/carry0987/docker-digest-builder/compare/v1.5.0...v1.6.0) (2026-03-28)
 
 
